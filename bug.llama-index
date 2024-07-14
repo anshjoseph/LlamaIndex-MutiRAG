@@ -6,3 +6,12 @@ from llama_index.embeddings import OpenAIEmbedding
 
 new
 from llama_index.embeddings.openai import OpenAIEmbedding
+
+
+ERROR
+>>> from llama_index.embeddings.openai import OpenAIEmbedding
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/media/ansh/22A048A8A04883EF/WORK/BOLNA/LlamaIndexRAG/env/lib/python3.11/site-packages/llama_index/__init__.py", line 20, in <module>
+    from llama_index.embeddings import OpenAIEmbedding
+ImportError: cannot import name 'OpenAIEmbedding' from 'llama_index.embeddings' (/media/ansh/22A048A8A04883EF/WORK/BOLNA/LlamaIndexRAG/env/lib/python3.11/site-packages/llama_index/embeddings/__init__.py)
