@@ -1,0 +1,8 @@
+llama_index/__init__.py", line 20, in <module>
+
+# embeddings
+old
+from llama_index.embeddings import OpenAIEmbedding
+
+new
+from llama_index.embeddings.openai import OpenAIEmbedding

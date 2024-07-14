@@ -1,11 +1,11 @@
 from .Base import BaseEmbed
-from llama_index.embeddings.openai import OpenAIEmbedding
+from  llama_index.embeddings.openai  import OpenAIEmbedding
 import dotenv
 import os
 dotenv.load_dotenv()
 class OpenAI(BaseEmbed):
     def __init__(self,name:str,model:str) -> None:
-        self.name = name
+        self.name = "OpenAI"
         self.model = model
         if os.getenv("OPENAI_KEY") is None:
             raise "OPENAI KEY IS NOT FOUND"
