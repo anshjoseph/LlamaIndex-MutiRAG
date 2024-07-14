@@ -1,5 +1,10 @@
 {
-    "default-provider": "lance-db",
+    "provider": "lance-db",
     "port": 8000,
-    "host": "0.0.0.0"
+    "host": "0.0.0.0",
+    "storage": "RAG",
+    "embeding":"openai",
+    "embeding-config":{
+        "model-name":"text-embedding-3-small"
+    }
 }
