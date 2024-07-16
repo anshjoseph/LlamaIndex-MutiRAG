@@ -7,7 +7,7 @@ from LlamaIndexRAG.DataModel import ProviderConfig
 
 class LanceDB(BaseProvider):
     def __init__(self, embeding: BaseEmbed, config:ProviderConfig) -> None:
-        super().__init__(config.provider, embeding, config.chunk_size, config.overlapping)
+        super().__init__("LanceDB", embeding, config.chunk_size, config.overlapping)
         self.loc = config.loc
         self.config = config
         self.path = f"DataBase/{self.loc}"

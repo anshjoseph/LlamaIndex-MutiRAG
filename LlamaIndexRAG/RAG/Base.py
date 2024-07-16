@@ -24,7 +24,7 @@ class BaseProvider:
         self.chunk_size = chunk_size
         self.overlapping = overlapping
         self.LLAMA_CLOUD  = os.getenv("LLAMA_PARSE_KEY")
-        if self.LLAMA_CLOUD in None:
+        if self.LLAMA_CLOUD is None:
             raise "LLAMA_PARSE_KEY is not exit in .env"
         self.parse = LlamaParse(
             api_key=self.LLAMA_CLOUD,

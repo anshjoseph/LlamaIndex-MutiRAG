@@ -1,18 +1,14 @@
 from LlamaIndexRAG.Embeding import EmbedProviders
 from LlamaIndexRAG.RAG import RAGProviders
-
-
-
 from .RAG import BaseProvider as RAGBase
-
-
-
 from .DataModel import RAGConfig, RAGTask, RAGTaskStatus
 import asyncio
 from threading import Thread
 from .Utils import configure_logger
 from typing import Dict
 from uuid import uuid4
+import tempfile
+import os
 
 logger = configure_logger(__name__)
 class RAG:
@@ -69,10 +65,10 @@ class RAGFactory:
         self.RAGS:Dict[str,RAG] = dict()
     def make_rag(self,config:RAGConfig):
         rag_name = f"index-{uuid4()}"
-        embeding = EmbedProviders[config.provider_config.embeding]
+        embeding = EmbedProviders[config.provider_config.embeding.provider](config.provider_config.embeding.model_name)
         vector_db = RAGProviders[config.provider](embeding,config.provider_config)
         rag = RAG(vector_db)
-        rag.start()
+        rag.RAG_THREAD.start()
         self.RAGS[rag_name] = rag
         return rag_name
     def stop_all(self):
@@ -85,3 +81,26 @@ class RAGFactory:
         else:
             raise "NO RAG WITH THAT ID EXIST's"
     
+    async def file_ingest(self,rag_name,file)->RAGTask:
+        if rag_name not in self.RAGS.keys():
+            raise f"rag: {rag_name} not exit"
+        if file.content_type not in ["application/pdf","application/x-pdf"]:
+            raise f"only support pdf for now"
+        task_id = str(uuid4())
+        temp_file = tempfile.NamedTemporaryFile()
+        temp_file.write(await file.read())
+        prev = temp_file.name
+        file_name = f"/tmp/{task_id}.pdf"
+        os.rename(prev,file_name)
+        task = RAGTask(file_loc=file_name)
+        await self.RAGS[rag_name].file_process_task_queue.put(task)
+        while task._status in [RAGTaskStatus.WAIT,RAGTaskStatus.PROCESSING]:
+            await asyncio.sleep(0.4)
+        os.rename(file_name,prev)
+        return task
+    async def retrive_query(self,rag_name:str,index:str,query:str):
+        # TODO: makes checks
+        rag = self.RAGS[rag_name]
+        rag
+        
+        

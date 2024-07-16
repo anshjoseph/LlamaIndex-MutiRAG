@@ -4,7 +4,7 @@ import dotenv
 import os
 dotenv.load_dotenv()
 class OpenAI(BaseEmbed):
-    def __init__(self,name:str,model:str) -> None:
+    def __init__(self,model:str) -> None:
         self.name = "OpenAI"
         self.model = model
         if os.getenv("OPENAI_KEY") is None:
