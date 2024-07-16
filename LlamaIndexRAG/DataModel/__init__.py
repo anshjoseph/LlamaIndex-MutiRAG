@@ -3,8 +3,10 @@ from typing import Union, Optional
 # from LlamaIndexRAG.Embeding import EmbedProviders
 # from LlamaIndexRAG.RAG import RAGProviders
 
-class LanceDB(BaseModel):
-    loc:str
+RAGProviders = ["LanceDB"]
+EmbedProviders = ["OpenAI"]
+
+
 
 def validate_attribute(value, allowed_values):
     if value not in allowed_values:
@@ -18,22 +20,23 @@ class ProviderConfig(BaseModel):
     loc:Optional[str] = ""
     @validator("embeding")
     def embeding_eval(cls, value):
-        return validate_attribute(value, ["openai"])
+        return validate_attribute(value, EmbedProviders)
 
 class RAGConfig(BaseModel):
     provider:str
     provider_config:ProviderConfig
     @validator("provider")
     def provider_eval(cls, value):
-        return validate_attribute(value, ["lacebd"])
+        return validate_attribute(value, RAGProviders)
     
+
 class Query(BaseModel):
     provider:str
     index:str
     query:str
     @validator("provider")
     def provider_eval(cls, value):
-        return validate_attribute(value, list(RAGProviders.keys()))
+        return validate_attribute(value, RAGProviders)
 
 class RAGTaskStatus:
     WAIT = "WAIT"
