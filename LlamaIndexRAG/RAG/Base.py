@@ -57,19 +57,21 @@ class BaseProvider:
         return nodes
     
     #TODO: make that in file lvl's
-    async def append_index(self,index:str,file_path:str,mode:str)->str:
+    async def append_index(self,nodes)->str:
         """
         index: index should be already present in the RAG
         mode: it take two modes (tt-split, ss-split) for diffrent node genration mech.
         """
         raise NotImplementedError
-    async def add_index(self,file_path:str,mode:str)->str:
+    async def add_index(self,nodes)->str:
         """
         index: index should be already present in the RAG
         mode: it take two modes (tt-split, ss-split) for diffrent node genration mech.
         """
         raise NotImplementedError
     async def delete_index(self,index:str)->bool:
+        raise NotImplementedError
+    async def get_docs_index(self,index:str):
         raise NotImplementedError
     
     
