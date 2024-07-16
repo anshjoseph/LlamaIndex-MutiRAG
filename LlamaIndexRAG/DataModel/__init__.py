@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator, ValidationError
 from typing import Union, Optional
-from LlamaIndexRAG import RAGProviders, EmbedingProviders
+# from LlamaIndexRAG.Embeding import EmbedProviders
+# from LlamaIndexRAG.RAG import RAGProviders
 
 class LanceDB(BaseModel):
     loc:str
@@ -17,14 +18,14 @@ class ProviderConfig(BaseModel):
     loc:Optional[str] = ""
     @validator("embeding")
     def embeding_eval(cls, value):
-        return validate_attribute(value, list(EmbedingProviders.keys()))
+        return validate_attribute(value, ["openai"])
 
 class RAGConfig(BaseModel):
     provider:str
     provider_config:ProviderConfig
     @validator("provider")
     def provider_eval(cls, value):
-        return validate_attribute(value, list(RAGProviders.keys()))
+        return validate_attribute(value, ["lacebd"])
     
 class Query(BaseModel):
     provider:str

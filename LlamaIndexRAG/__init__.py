@@ -1,7 +1,12 @@
-from .Embeding import Providers as EmbedingProviders
-from .RAG import Providers as RAGProviders
-from .Embeding import BaseEmbed as EmbedingBase
+from LlamaIndexRAG.Embeding import EmbedProviders
+from LlamaIndexRAG.RAG import RAGProviders
+
+
+
 from .RAG import BaseProvider as RAGBase
+
+
+
 from .DataModel import RAGConfig, RAGTask, RAGTaskStatus
 import asyncio
 from threading import Thread
@@ -46,9 +51,6 @@ class RAG:
                 continue
             task._index = index
             task._status = RAGTaskStatus.SUCESSFUL
-
-
-                
     def start(self):
         loop = asyncio.new_event_loop()
         ingestion_task_pool = [loop.create_task(self.__ingestion_task()) for _ in range(self.PipeLineTASK)]
@@ -67,7 +69,7 @@ class RAGFactory:
         self.RAGS:Dict[str,RAG] = dict()
     def make_rag(self,config:RAGConfig):
         rag_name = f"index-{uuid4()}"
-        embeding = EmbedingProviders[config.provider_config.embeding]
+        embeding = EmbedProviders[config.provider_config.embeding]
         vector_db = RAGProviders[config.provider](embeding,config.provider_config)
         rag = RAG(vector_db)
         rag.start()
@@ -79,7 +81,7 @@ class RAGFactory:
     def stop(self,rag_name:str):
         if rag_name in self.RAGS.keys():
             self.RAGS[rag_name].shutdown = True
-            del self.RAGS.pop(rag_name)
+            self.RAGS.pop(rag_name)
         else:
             raise "NO RAG WITH THAT ID EXIST's"
     
