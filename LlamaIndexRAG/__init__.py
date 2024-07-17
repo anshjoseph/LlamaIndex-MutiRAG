@@ -101,6 +101,6 @@ class RAGFactory:
     async def retrive_query(self,rag_name:str,index:str,query:str):
         # TODO: makes checks
         rag = self.RAGS[rag_name]
-        rag
+        return await rag.VectorDB.get_docs_index(query=query,index=index)
         
         

@@ -8,6 +8,7 @@ from llama_index.core.node_parser import (
     TextSplitter
 )
 from llama_index.llms.openai import OpenAI
+from llama_index.core import Settings
 import dotenv
 import os
 
@@ -35,6 +36,9 @@ class BaseProvider:
         if self.OPENAI_KEY is None:
             raise "OPENAI_KEY is not exit in .env"
         self.llm = OpenAI(model="gpt-3.5-turbo", temperature=0.2,api_key=self.OPENAI_KEY)
+
+        Settings.embed_model = self.embeding_model
+        Settings.llm = self.llm
     def genrate_table_name(self):
         return str(uuid4())
     async def genrate_nodes_sentence_splitter(self,file_loc:str):
@@ -71,7 +75,7 @@ class BaseProvider:
         raise NotImplementedError
     async def delete_index(self,index:str)->bool:
         raise NotImplementedError
-    async def get_docs_index(self,index:str):
+    async def get_docs_index(self,query:str ,index: str):
         raise NotImplementedError
     
     

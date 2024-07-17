@@ -12,6 +12,7 @@ class LanceDB(BaseProvider):
         self.config = config
         self.path = f"DataBase/{self.loc}"
 
+
         
     #Basic operation's
     async def append_index(self, nodes) -> Coroutine[Any, Any, str]:
@@ -32,5 +33,5 @@ class LanceDB(BaseProvider):
         vector_store = LanceDBVectorStore(uri=self.path,table_name=index)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         vector_index = VectorStoreIndex(nodes=[],storage_context=storage_context)
-        query_engine = vector_index.as_query_engine()
+        query_engine = vector_index.as_query_engine(llm=self.llm)
         return query_engine.retrieve(query)
