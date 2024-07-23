@@ -1,10 +1,9 @@
-from LlamaIndexRAG.Embeding import EmbedProviders
-from LlamaIndexRAG.RAG import RAGProviders
-from .RAG import BaseProvider as RAGBase
+from MultiRAG.Embeding import EmbedProviders
+from MultiRAG.RAG import RAGProviders, BaseRAG
 from .DataModel import RAGConfig, RAGTask, RAGTaskStatus
 import asyncio
 from threading import Thread
-from .Utils import configure_logger
+from .utils import configure_logger
 from typing import Dict
 from uuid import uuid4
 import tempfile
@@ -12,12 +11,12 @@ import os
 
 logger = configure_logger(__name__)
 class RAG:
-    def __init__(self,VectorDB:RAGBase,PipeLineTASK:int=2) -> None:
+    def __init__(self, VectorDB:BaseRAG, Workers:int=2) -> None:
         self.file_process_task_queue:asyncio.Queue = asyncio.Queue()
         self.file_store_task_queue:asyncio.Queue = asyncio.Queue()
         
-        self.VectorDB:RAGBase = VectorDB
-        self.PipeLineTASK:int = PipeLineTASK
+        self.VectorDB:BaseRAG = VectorDB
+        self.Workers:int = Workers
 
         self.RAG_THREAD = Thread(target=self.start)
         self.shutdown = False
@@ -35,6 +34,7 @@ class RAG:
                 task._status = RAGTaskStatus.ERROR
                 continue
             task._nodes = nodes
+            # nodes[0].get
             await self.file_store_task_queue.put(task)
     async def __nodes_storage(self):
         while not self.shutdown:
@@ -49,7 +49,7 @@ class RAG:
             task._status = RAGTaskStatus.SUCESSFUL
     def start(self):
         loop = asyncio.new_event_loop()
-        ingestion_task_pool = [loop.create_task(self.__ingestion_task()) for _ in range(self.PipeLineTASK)]
+        ingestion_task_pool = [loop.create_task(self.__ingestion_task()) for _ in range(self.Workers)]
         file_storage = loop.create_task(self.__nodes_storage())
         loop.run_until_complete(self.__shutdown_loop())
         file_storage.cancel()
@@ -63,14 +63,16 @@ class RAG:
 class RAGFactory:
     def __init__(self) -> None:
         self.RAGS:Dict[str,RAG] = dict()
+
     def make_rag(self,config:RAGConfig):
-        rag_name = f"index-{uuid4()}"
+        rag_name = f"RAG-{uuid4()}"
         embeding = EmbedProviders[config.provider_config.embeding.provider](config.provider_config.embeding.model_name)
         vector_db = RAGProviders[config.provider](embeding,config.provider_config)
-        rag = RAG(vector_db)
+        rag = RAG(vector_db, config.provider_config.worker)
         rag.RAG_THREAD.start()
         self.RAGS[rag_name] = rag
         return rag_name
+    
     def stop_all(self):
         for rag in self.RAGS.values():
             rag.shutdown = True
@@ -94,8 +96,10 @@ class RAGFactory:
         os.rename(prev,file_name)
         task = RAGTask(file_loc=file_name)
         await self.RAGS[rag_name].file_process_task_queue.put(task)
+
         while task._status in [RAGTaskStatus.WAIT,RAGTaskStatus.PROCESSING]:
             await asyncio.sleep(0.4)
+        
         os.rename(file_name,prev)
         return task
     async def retrive_query(self,rag_name:str,index:str,query:str):

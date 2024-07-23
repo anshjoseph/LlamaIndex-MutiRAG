@@ -1,7 +1,7 @@
 from uuid import uuid4
 from llama_parse import LlamaParse
-from LlamaIndexRAG.Embeding import BaseEmbed
-from LlamaIndexRAG.Utils import configure_logger
+from MultiRAG.Embeding import BaseEmbed
+from MultiRAG.utils import configure_logger
 from llama_index.core.node_parser import (
     MarkdownElementNodeParser,
     SentenceSplitter,
@@ -17,8 +17,8 @@ dotenv.load_dotenv()
 
 logger = configure_logger(__name__)
 
-class BaseProvider:
-    def __init__(self,provider:str,embeding:BaseEmbed,chunk_size:int,overlapping:int) -> None:
+class BaseRAG:
+    def __init__(self, provider:str, embeding:BaseEmbed, chunk_size:int, overlapping:int) -> None:
         self.provider = provider
         self.base_embed:BaseEmbed = embeding
         self.embeding_model = self.base_embed.get_embeding()
@@ -39,8 +39,9 @@ class BaseProvider:
 
         Settings.embed_model = self.embeding_model
         Settings.llm = self.llm
-    def genrate_table_name(self):
+    def genrate_index_name(self):
         return str(uuid4())
+    
     async def genrate_nodes_sentence_splitter(self,file_loc:str):
         docs = await self.parse.aload_data(file_path=file_loc)
         node_parser = MarkdownElementNodeParser(num_workers=8,llm=self.llm)

@@ -1,4 +1,4 @@
-from .Base import BaseEmbed
+from .base import BaseEmbed
 from  llama_index.embeddings.openai  import OpenAIEmbedding
 import dotenv
 import os

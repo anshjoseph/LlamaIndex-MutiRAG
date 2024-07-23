@@ -1,15 +1,17 @@
 from typing import Any, Coroutine
-from LlamaIndexRAG.Embeding.Base import BaseEmbed
-from .Base import BaseProvider
+from MultiRAG.Embeding.base import BaseEmbed
+from .base import BaseRAG
 from llama_index.vector_stores.lancedb import LanceDBVectorStore
 from llama_index.core import VectorStoreIndex, StorageContext
-from LlamaIndexRAG.DataModel import ProviderConfig
+from MultiRAG.DataModel import ProviderConfig, LanceDBConfig
+from llama_index.core.retrievers import VectorIndexRetriever
 
-class LanceDB(BaseProvider):
+class LanceDB(BaseRAG):
     def __init__(self, embeding: BaseEmbed, config:ProviderConfig) -> None:
         super().__init__("LanceDB", embeding, config.chunk_size, config.overlapping)
-        self.loc = config.loc
-        self.config = config
+        self.similarity_top_k = config.similarity_top_k
+        self.config:LanceDBConfig = config.rag
+        self.loc = self.config.loc
         self.path = f"DataBase/{self.loc}"
 
 
@@ -19,7 +21,7 @@ class LanceDB(BaseProvider):
         return None
     
     async def add_index(self, nodes) -> str:
-        table_name = self.genrate_table_name()
+        table_name = self.genrate_index_name()
         # TODO: add reranking in the DB
         vector_store = LanceDBVectorStore(self.path,table_name=table_name)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
@@ -33,5 +35,6 @@ class LanceDB(BaseProvider):
         vector_store = LanceDBVectorStore(uri=self.path,table_name=index)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         vector_index = VectorStoreIndex(nodes=[],storage_context=storage_context)
-        query_engine = vector_index.as_query_engine(llm=self.llm)
+        query_engine = VectorIndexRetriever(vector_index,similarity_top_k=self.similarity_top_k)
+        # query_engine = vector_index.as_query_engine(llm=self.llm)
         return query_engine.retrieve(query)
