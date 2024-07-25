@@ -14,15 +14,11 @@ class LanceDB(BaseRAG):
         self.loc = self.config.loc
         self.path = f"DataBase/{self.loc}"
 
-
-        
-    #Basic operation's
     async def append_index(self, nodes) -> Coroutine[Any, Any, str]:
         return None
     
     async def add_index(self, nodes) -> str:
         table_name = self.genrate_index_name()
-        # TODO: add reranking in the DB
         vector_store = LanceDBVectorStore(self.path,table_name=table_name)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         vector_index = VectorStoreIndex(nodes=nodes,storage_context=storage_context,embed_model=self.embeding_model)
