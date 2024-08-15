@@ -17,7 +17,7 @@ class LanceDB(BaseRAG):
     async def append_index(self, nodes) -> Coroutine[Any, Any, str]:
         return None
     
-    async def add_index(self, nodes) -> str:
+    async def add_index(self, nodes, config=None) -> str:
         table_name = self.genrate_index_name()
         vector_store = LanceDBVectorStore(self.path,table_name=table_name)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)

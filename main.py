@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile
-from MultiRAG.DataModel import RAGConfig
+from MultiRAG.DataModel import RAGConfig, IngestionPipeConfig
 from MultiRAG import RAGFactory
 import uvicorn
 import time
@@ -23,10 +23,10 @@ def create_rag(request:RAGConfig):
     rag_id = rag_factory.make_rag(request)
     return {"rag_id":rag_id}
 
-@app.post("/rag-upload-file/{rag_id}")
-async def rag_upload_file(file:UploadFile,rag_id:str):
+@app.post("/rag-upload-file")
+async def rag_upload_file(file:UploadFile,request:IngestionPipeConfig):
     try:
-        task = await rag_factory.file_ingest(rag_name=rag_id,file=file)
+        task = await rag_factory.file_ingest(rag_name=request.rag_id,file=file)
         return  {"index":task._index,"status":task._status,"message":"DONE"}
     except Exception as e:
         return {"index":None,"status":"ERROR","message":f"{e}"}

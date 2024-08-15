@@ -28,7 +28,10 @@ class RAG:
             task:RAGTask =  await self.file_process_task_queue.get()
             task._status = RAGTaskStatus.PROCESSING
             try:
-                nodes = await self.VectorDB.genrate_nodes_sentence_splitter(task.file_loc)
+                if task._config.mode == "ts":
+                    nodes = await self.VectorDB.genrate_nodes_text_splitter(task.file_loc)
+                else:
+                    nodes = await self.VectorDB.genrate_nodes_sentence_splitter(task.file_loc)
             except Exception as e:
                 logger.error(f"ERROR in {e}")
                 task._status = RAGTaskStatus.ERROR
@@ -40,7 +43,7 @@ class RAG:
         while not self.shutdown:
             task:RAGTask = await self.file_store_task_queue.get()
             try:
-                index =  await self.VectorDB.add_index(task._nodes)
+                index =  await self.VectorDB.add_index(task._nodes,task._config.provider_config)
             except Exception as e:
                 logger.error(f"ERROR in {e}")
                 task._status = RAGTaskStatus.ERROR
@@ -83,7 +86,7 @@ class RAGFactory:
         else:
             raise "NO RAG WITH THAT ID EXIST's"
     
-    async def file_ingest(self,rag_name,file)->RAGTask:
+    async def file_ingest(self,rag_name,file,config:dict)->RAGTask:
         if rag_name not in self.RAGS.keys():
             raise f"rag: {rag_name} not exit"
         if file.content_type not in ["application/pdf","application/x-pdf"]:
@@ -95,6 +98,7 @@ class RAGFactory:
         file_name = f"/tmp/{task_id}.pdf"
         os.rename(prev,file_name)
         task = RAGTask(file_loc=file_name)
+        task._config = config
         await self.RAGS[rag_name].file_process_task_queue.put(task)
 
         while task._status in [RAGTaskStatus.WAIT,RAGTaskStatus.PROCESSING]:

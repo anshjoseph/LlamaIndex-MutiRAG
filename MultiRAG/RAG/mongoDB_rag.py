@@ -4,7 +4,7 @@ from .base import BaseRAG
 from pymongo import MongoClient
 from llama_index.vector_stores.mongodb import MongoDBAtlasVectorSearch
 from llama_index.core import VectorStoreIndex, StorageContext
-from MultiRAG.DataModel import ProviderConfig, MongoDBConfig
+from MultiRAG.DataModel import ProviderConfig, MongoDBConfig, MongoIngestionPipe
 from llama_index.core.retrievers import VectorIndexRetriever
 
 class MongoDB(BaseRAG):
@@ -32,8 +32,8 @@ class MongoDB(BaseRAG):
     async def delete_index(self, index: str) -> Coroutine[Any, Any, bool]:
         return super().delete_index(index)
     
-    async def add_index(self, nodes) -> str:
-        index = self.genrate_index_name()
+    async def add_index(self, nodes, config:MongoIngestionPipe) -> str:
+        index = config.index
         vector_store = MongoDBAtlasVectorSearch(
             self.client,
             db_name = self.config.db,

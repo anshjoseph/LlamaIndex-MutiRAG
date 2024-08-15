@@ -43,9 +43,22 @@ class RAGTaskStatus:
     ERROR = "ERROR"
     SUCESSFUL = "SUCESSFUL"
 
+
+
+
+class MongoIngestionPipe(BaseModel):
+    index:Optional[str]
+
+class IngestionPipeConfig(BaseModel):
+    mode:str = "ss"
+    rag_id:str
+    provider_config:Optional[MongoIngestionPipe] = None
+
+
 class RAGTask(BaseModel):
     file_loc:str
     _status:str = RAGTaskStatus.WAIT
     _message:str = ""
     _index:str = ""
     _nodes:list = []
+    _config:IngestionPipeConfig = None

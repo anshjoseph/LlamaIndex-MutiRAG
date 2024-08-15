@@ -68,7 +68,7 @@ class BaseRAG:
         mode: it take two modes (tt-split, ss-split) for diffrent node genration mech.
         """
         raise NotImplementedError
-    async def add_index(self,nodes)->str:
+    async def add_index(self,nodes,config)->str:
         """
         index: index should be already present in the RAG
         mode: it take two modes (tt-split, ss-split) for diffrent node genration mech.
